@@ -10,7 +10,6 @@ jobs:
     uses: alxch-/reusable-workflows-demo/.github/workflows/build.yml@v1.0.0
     with:
       build-target: production
-      workflow-ref: alxch-/reusable-workflows-demo/.github/workflows/build.yml@refs/tags/v1.0.0
     secrets:
       DD_API_KEY: ${{ secrets.DD_API_KEY }}
 
