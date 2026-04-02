@@ -44,7 +44,11 @@ jobs:
             --tags "reusable_workflow.input.build_target:${{ inputs.build-target }}"
 
       - name: Build
-        run: echo "Building ${{ inputs.build-target }}"
+        run: |
+          echo "Building ${{ inputs.build-target }}"
+          sleep 30
 
       - name: Run tests
-        run: echo "Running tests for ${{ inputs.build-target }}"
+        run: |
+          echo "Running tests for ${{ inputs.build-target }}"
+          sleep 30
