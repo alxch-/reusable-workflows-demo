@@ -6,6 +6,10 @@ on:
       build-target:
         required: true
         type: string
+      workflow-ref:
+        required: false
+        type: string
+        default: ''
     secrets:
       DD_API_KEY:
         required: true
@@ -22,7 +26,10 @@ jobs:
           DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
           DATADOG_SITE: datadoghq.com
         run: |
-          WORKFLOW_REF="${{ github.workflow_ref }}"
+          WORKFLOW_REF="${{ inputs.workflow-ref }}"
+          if [ -z "$WORKFLOW_REF" ]; then
+            WORKFLOW_REF="${{ github.workflow_ref }}"
+          fi
 
           # Extract the version or branch ref (the part after '@')
           WORKFLOW_VERSION="${WORKFLOW_REF##*@}"
@@ -30,7 +37,7 @@ jobs:
           # Extract the workflow path (the part before '@')
           WORKFLOW_PATH="${WORKFLOW_REF%%@*}"
 
-          # Extract the source repository (the part before the first '/')
+          # Extract the source repository
           WORKFLOW_REPO="${WORKFLOW_PATH%%/.github/*}"
 
           npx @datadog/datadog-ci tag --level job \
