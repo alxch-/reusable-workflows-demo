@@ -6,6 +6,9 @@ on:
       build-target:
         required: true
         type: string
+    secrets:
+      DD_API_KEY:
+        required: true
 
 jobs:
   build:
@@ -13,6 +16,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Tag reusable workflow metadata in CI Visibility
+        env:
+          DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+        run: |
+          WORKFLOW_REF="${{ github.workflow_ref }}"
+
+          # Extract the version or branch ref (the part after '@')
+          WORKFLOW_VERSION="${WORKFLOW_REF##*@}"
+
+          # Extract the workflow path (the part before '@')
+          WORKFLOW_PATH="${WORKFLOW_REF%%@*}"
+
+          # Extract the source repository (the part before the first '/')
+          WORKFLOW_REPO="${WORKFLOW_PATH%%/.github/*}"
+
+          npx @datadog/datadog-ci tag --level job \
+            --tags "reusable_workflow.ref:${WORKFLOW_VERSION}" \
+            --tags "reusable_workflow.path:${WORKFLOW_PATH}" \
+            --tags "reusable_workflow.repo:${WORKFLOW_REPO}" \
+            --tags "reusable_workflow.caller_repo:${{ github.repository }}" \
+            --tags "reusable_workflow.input.build_target:${{ inputs.build-target }}"
 
       - name: Build
         run: echo "Building ${{ inputs.build-target }}"

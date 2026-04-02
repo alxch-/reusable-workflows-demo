@@ -10,6 +10,8 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       build-target: production
+    secrets:
+      DD_API_KEY: ${{ secrets.DD_API_KEY }}
 
   lint:
     runs-on: ubuntu-latest
