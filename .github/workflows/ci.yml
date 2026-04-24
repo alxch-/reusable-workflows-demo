@@ -7,7 +7,7 @@ on:
 
 jobs:
   call-shared-build:
-    uses: alxch-/reusable-workflows-demo/.github/workflows/build.yml@v1.0.0
+    uses: alxch-/reusable-workflows-demo/.github/workflows/build.yml@v1.1.0
     with:
       build-target: production
     secrets:
