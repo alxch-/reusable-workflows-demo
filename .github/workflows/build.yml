@@ -17,29 +17,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Show resolved job context values
+        run: |
+          echo "job.workflow_ref        = ${{ job.workflow_ref }}"
+          echo "job.workflow_sha        = ${{ job.workflow_sha }}"
+          echo "job.workflow_repository = ${{ job.workflow_repository }}"
+          echo "job.workflow_file_path  = ${{ job.workflow_file_path }}"
+          echo "github.repository       = ${{ github.repository }}"
+
       - name: Tag reusable workflow metadata in CI Visibility
         env:
           DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
           DATADOG_SITE: datadoghq.com
-          GH_TOKEN: ${{ github.token }}
         run: |
-          # Look up the reusable workflow ref from the GitHub API
-          REFERENCED=$(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }} \
-            --jq '.referenced_workflows[0] | "\(.path)@\(.ref)"')
-
-          # Extract the version or branch ref (the part after '@')
-          WORKFLOW_VERSION="${REFERENCED##*@}"
-
-          # Extract the workflow path (the part before '@')
-          WORKFLOW_PATH="${REFERENCED%%@*}"
-
-          # Extract the source repository
-          WORKFLOW_REPO="${WORKFLOW_PATH%%/.github/*}"
-
           npx @datadog/datadog-ci tag --level job \
-            --tags "reusable_workflow.ref:${WORKFLOW_VERSION}" \
-            --tags "reusable_workflow.path:${WORKFLOW_PATH}" \
-            --tags "reusable_workflow.repo:${WORKFLOW_REPO}" \
+            --tags "reusable_workflow.ref:${{ job.workflow_ref }}" \
+            --tags "reusable_workflow.sha:${{ job.workflow_sha }}" \
+            --tags "reusable_workflow.repo:${{ job.workflow_repository }}" \
+            --tags "reusable_workflow.file_path:${{ job.workflow_file_path }}" \
             --tags "reusable_workflow.caller_repo:${{ github.repository }}" \
             --tags "reusable_workflow.input.build_target:${{ inputs.build-target }}"
 
