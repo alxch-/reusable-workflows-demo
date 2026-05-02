@@ -7,25 +7,47 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-host-override:
+  test-host-name:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Tag job with candidate hostname overrides
+      - uses: actions/checkout@v4
+      - name: Tag with host.name
         env:
           DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
           DATADOG_SITE: datadoghq.com
         run: |
-          TEST_ID="hosttest-${{ github.run_id }}-${{ github.run_attempt }}"
-          echo "TEST_ID=$TEST_ID"
+          TEST_ID="hostname-${{ github.run_id }}-${{ github.run_attempt }}"
           npx @datadog/datadog-ci tag --level job \
-            --tags "host:host-tag-${TEST_ID}" \
-            --tags "hostname:hostname-tag-${TEST_ID}" \
-            --tags "github.runner_name:runnername-tag-${TEST_ID}" \
-            --tags "ci.node.name:cinodename-tag-${TEST_ID}" \
+            --tags "host.name:host-name-tag-${TEST_ID}" \
             --tags "test_marker:${TEST_ID}"
+      - run: sleep 30
 
-      - name: Sleep so tags land before job ends
-        run: sleep 30
+  test-dd-hostname:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag with _dd.hostname
+        env:
+          DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+        run: |
+          TEST_ID="ddhostname-${{ github.run_id }}-${{ github.run_attempt }}"
+          npx @datadog/datadog-ci tag --level job \
+            --tags "_dd.hostname:dd-hostname-tag-${TEST_ID}" \
+            --tags "test_marker:${TEST_ID}"
+      - run: sleep 30
+
+  test-host-id:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag with host_id
+        env:
+          DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+        run: |
+          TEST_ID="hostid-${{ github.run_id }}-${{ github.run_attempt }}"
+          npx @datadog/datadog-ci tag --level job \
+            --tags "host_id:host-id-tag-${TEST_ID}" \
+            --tags "test_marker:${TEST_ID}"
+      - run: sleep 30
