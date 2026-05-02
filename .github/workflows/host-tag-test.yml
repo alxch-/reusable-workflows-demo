@@ -1,0 +1,31 @@
+name: Host Tag Test
+
+on:
+  push:
+    branches:
+      - 'alexc/host-tag-test'
+  workflow_dispatch:
+
+jobs:
+  test-host-override:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Tag job with candidate hostname overrides
+        env:
+          DATADOG_API_KEY: ${{ secrets.DD_API_KEY }}
+          DATADOG_SITE: datadoghq.com
+        run: |
+          TEST_ID="hosttest-${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "TEST_ID=$TEST_ID"
+          npx @datadog/datadog-ci tag --level job \
+            --tags "host:host-tag-${TEST_ID}" \
+            --tags "hostname:hostname-tag-${TEST_ID}" \
+            --tags "github.runner_name:runnername-tag-${TEST_ID}" \
+            --tags "ci.node.name:cinodename-tag-${TEST_ID}" \
+            --tags "test_marker:${TEST_ID}"
+
+      - name: Sleep so tags land before job ends
+        run: sleep 30
